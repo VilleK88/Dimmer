@@ -29,7 +29,7 @@ int main() {
     const uint buttons[] = {SW2, SW1, SW0};
     const uint leds[] = {D1, D2, D3};
     uint brightness = BR_MID; // LEDs brightness value
-    
+
     // Initialize chosen serial port
     stdio_init_all();
     // Initialize buttons
@@ -107,12 +107,12 @@ void ini_leds(const uint *leds) {
 }
 
 bool light_switch(const uint *leds, const uint brightness, const bool on) {
-    for (int i = 0; i < LEDS_SIZE; i++) {
-        const uint slice_num = pwm_gpio_to_slice_num(leds[i]);
-        const uint chan = pwm_gpio_to_channel(leds[i]);
-        pwm_set_chan_level(slice_num, chan, on ? brightness : 0);
+    if (on) {
+        set_brightness(leds, brightness);
+        return true;
     }
-    return on;
+    set_brightness(leds, 0);
+    return false;
 }
 
 void set_brightness(const uint *leds, const uint brightness) {
