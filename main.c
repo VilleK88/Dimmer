@@ -79,7 +79,7 @@ void ini_buttons(const uint *buttons) {
 }
 
 void ini_leds(const uint *leds, const uint brightness) {
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < LEDS_SIZE; i++) {
         const uint slice_num = pwm_gpio_to_slice_num(leds[i]); // Get slice
         const uint chan = pwm_gpio_to_channel(leds[i]); // Channel GPIO pin
         pwm_set_enabled(slice_num, false); // Stop PWM
