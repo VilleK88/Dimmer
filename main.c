@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
 #include "hardware/pwm.h"
-#include "hardware/gpio.h"
 #include <stdbool.h>
 
 #define FREQ 125
