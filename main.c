@@ -17,6 +17,8 @@
 #define D3 20 // left LED
 #define LEDS_SIZE 3
 
+#define BR_RATE 50 // how fast brightness rate changes
+
 void ini_buttons(const uint *buttons);
 void ini_leds(const uint *leds, uint brightness);
 bool light_switch(const uint *leds, uint brightness, bool on);
@@ -55,17 +57,17 @@ int main() {
         if (lightsOn) {
             // Increase lighting
             if (!gpio_get(SW2)) {
-                brightness = clamp((int)brightness - 50);
+                brightness = clamp((int)brightness - BR_RATE);
                 set_brightness(leds, brightness);
             }
             // Decrease lighting
             if (!gpio_get(SW0)) {
-                brightness = clamp((int)brightness + 50);
+                brightness = clamp((int)brightness + BR_RATE);
                 set_brightness(leds, brightness);
             }
         }
 
-        sleep_ms(250);
+        sleep_ms(200);
         previous_state = sw1_state;
     }
 }
