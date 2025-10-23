@@ -29,8 +29,7 @@ int main() {
     const uint buttons[] = {SW2, SW1, SW0};
     const uint leds[] = {D1, D2, D3};
     uint brightness = BR_MID; // LEDs brightness value
-
-
+    
     // Initialize chosen serial port
     stdio_init_all();
     // Initialize buttons
