@@ -9,12 +9,12 @@
 #define SW2 7 // right button - decreases brightness
 #define SW1 8 // middle button - light switch
 #define SW0 9 // left button - increases brightness
-#define BUTTONS_SIZE 3
+#define BUTTONS_SIZE 3 // how many buttons
 
 #define D1 22 // right LED
 #define D2 21 // middle LED
 #define D3 20 // left LED
-#define LEDS_SIZE 3
+#define LEDS_SIZE 3 // how many LEDs
 
 #define BR_RATE 50 // how fast brightness rate changes
 #define BR_MID 500 // 50% brightness level
