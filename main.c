@@ -8,7 +8,7 @@
 #define TOP_FREQ 999
 
 #define SW2 7 // right button - decreases brightness
-#define SW1 8 // middle button
+#define SW1 8 // middle button - light switch
 #define SW0 9 // left button - increases brightness
 #define BUTTONS_SIZE 3
 
@@ -18,9 +18,10 @@
 #define LEDS_SIZE 3
 
 #define BR_RATE 50 // how fast brightness rate changes
+#define BR_MID 500 // 50% brightness level
 
 void ini_buttons(const uint *buttons);
-void ini_leds(const uint *leds, uint brightness);
+void ini_leds(const uint *leds);
 bool light_switch(const uint *leds, uint brightness, bool on);
 void set_brightness(const uint *leds, uint brightness);
 uint clamp(int br);
@@ -28,17 +29,20 @@ uint clamp(int br);
 int main() {
     const uint buttons[] = {SW2, SW1, SW0};
     const uint leds[] = {D1, D2, D3};
-    uint brightness = 0;
+    uint brightness = BR_MID; // LEDs brightness value
+
 
     // Initialize chosen serial port
     stdio_init_all();
     // Initialize buttons
     ini_buttons(buttons);
     // Initialize LED pins
-    ini_leds(leds, brightness);
+    ini_leds(leds);
 
-    bool previous_state = true;
+    // Initialize boolean lights on/off value
     bool lightsOn = false;
+    // Initialize release SW1 button boolean
+    bool previous_state = true;
 
     while (true) {
 
@@ -46,12 +50,19 @@ int main() {
         if (previous_state && !sw1_state) {
             // Turn lights on
             if (!lightsOn) {
-                if (brightness <= 0) brightness = 500;
                 lightsOn = light_switch(leds, brightness, true);
             }
-            // Turn lights off
-            else
-                lightsOn = light_switch(leds, 0, false);
+            else {
+                // If LEDs are on and dimmed to 0% then set 50% brightness
+                if (brightness <= 0) {
+                    brightness = BR_MID;
+                    set_brightness(leds, BR_MID);
+                }
+                // Turn lights off
+                else {
+                    lightsOn = light_switch(leds, 0, false);
+                }
+            }
         }
 
         if (lightsOn) {
@@ -80,7 +91,7 @@ void ini_buttons(const uint *buttons) {
     }
 }
 
-void ini_leds(const uint *leds, const uint brightness) {
+void ini_leds(const uint *leds) {
     for (int i = 0; i < LEDS_SIZE; i++) {
         const uint slice_num = pwm_gpio_to_slice_num(leds[i]); // Get slice
         const uint chan = pwm_gpio_to_channel(leds[i]); // Channel GPIO pin
@@ -91,14 +102,13 @@ void ini_leds(const uint *leds, const uint brightness) {
         pwm_config_set_wrap(&config, TOP_FREQ); // Set wrap (TOP)
 
         pwm_init(slice_num, &config, false); // start set to false
-        pwm_set_chan_level(slice_num, chan, brightness); // duty cycle
+        pwm_set_chan_level(slice_num, chan, 0); // duty cycle
         gpio_set_function(leds[i], GPIO_FUNC_PWM); // Select PWM mode for pin
         pwm_set_enabled(slice_num, true); // Start PWM
     }
 }
 
 bool light_switch(const uint *leds, const uint brightness, const bool on) {
-
     for (int i = 0; i < LEDS_SIZE; i++) {
         const uint slice_num = pwm_gpio_to_slice_num(leds[i]);
         const uint chan = pwm_gpio_to_channel(leds[i]);
@@ -106,7 +116,6 @@ bool light_switch(const uint *leds, const uint brightness, const bool on) {
     }
     if (on)
         return true;
-
     return false;
 }
 
@@ -121,9 +130,7 @@ void set_brightness(const uint *leds, const uint brightness) {
 uint clamp(const int br) {
     if (br < 0)
         return 0;
-
     if (br > TOP_FREQ)
         return TOP_FREQ;
-
     return br;
 }
