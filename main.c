@@ -112,11 +112,9 @@ bool light_switch(const uint *leds, const uint brightness, const bool on) {
     for (int i = 0; i < LEDS_SIZE; i++) {
         const uint slice_num = pwm_gpio_to_slice_num(leds[i]);
         const uint chan = pwm_gpio_to_channel(leds[i]);
-        pwm_set_chan_level(slice_num, chan, brightness);
+        pwm_set_chan_level(slice_num, chan, on ? brightness : 0);
     }
-    if (on)
-        return true;
-    return false;
+    return on;
 }
 
 void set_brightness(const uint *leds, const uint brightness) {
