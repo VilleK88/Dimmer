@@ -56,7 +56,7 @@ int main() {
 
         if (lightsOn) {
             // Increase lighting
-            printf("Brightness before: %d\r\n", brightness);
+            //printf("Brightness before: %d\r\n", brightness);
             if (!gpio_get(SW2)) {
                 brightness = clamp((int)brightness - 40);
                 set_brightness(leds, brightness);
@@ -66,7 +66,7 @@ int main() {
                 brightness = clamp((int)brightness + 40);
                 set_brightness(leds, brightness);
             }
-            printf("Brightness after: %d\r\n", brightness);
+            //printf("Brightness after: %d\r\n", brightness);
         }
 
         sleep_ms(250);
@@ -84,21 +84,23 @@ void ini_buttons(const uint *buttons) {
 
 void ini_leds(const uint *leds, const uint brightness) {
     for (int i = 0; i < 3; i++) {
+        const uint slice_num = pwm_gpio_to_slice_num(leds[i]); // Get slice
+        const uint chan = pwm_gpio_to_channel(leds[i]); // Channel GPIO pin
+        pwm_set_enabled(leds[i], false); // Stop PWM
+
+        pwm_config config = pwm_get_default_config(); // Get default PWM configuration
+        pwm_config_set_clkdiv_int(&config, FREQ); // Set clock divider
+        pwm_config_set_wrap(&config, TOP_FREQ); // Set wrap (TOP)
+
+        pwm_init(slice_num, &config, false); // start set to false
+        pwm_set_chan_level(slice_num, chan, brightness); // duty cycle
         gpio_set_function(leds[i], GPIO_FUNC_PWM);
-        const uint slice_num = pwm_gpio_to_slice_num(leds[i]);
-        const uint chan = pwm_gpio_to_channel(leds[i]);
-
-        pwm_config config = pwm_get_default_config();
-        pwm_config_set_clkdiv_int(&config, FREQ);
-        pwm_config_set_wrap(&config, TOP_FREQ);
-
-        pwm_init(slice_num, &config, true);
-        pwm_set_chan_level(slice_num, chan, brightness);
-        pwm_set_enabled(slice_num, false);
+        pwm_set_enabled(leds[i], true); // Start PWM
     }
 }
 
 bool lights_on(const uint *leds, const uint brightness) {
+    printf("Lights on\r\n");
     for (int i = 0; i < LEDS_SIZE; i++) {
         const uint slice_num = pwm_gpio_to_slice_num(leds[i]);
         const uint chan = pwm_gpio_to_channel(leds[i]);
@@ -109,6 +111,7 @@ bool lights_on(const uint *leds, const uint brightness) {
 }
 
 bool lights_off(const uint *leds) {
+    printf("Lights off\r\n");
     for (int i = 0; i < LEDS_SIZE; i++) {
         const uint slice_num = pwm_gpio_to_slice_num(leds[i]);
         pwm_set_enabled(slice_num, false);
@@ -126,12 +129,12 @@ void set_brightness(const uint *leds, const uint brightness) {
 
 uint clamp(const int br) {
     if (br < 0) {
-        printf("return 0\r\n");
+        //printf("return 0\r\n");
         return 0;
     }
 
     if (br > TOP_FREQ) {
-        printf("Return top frequency\r\n");
+        //printf("Return top frequency\r\n");
         return TOP_FREQ;
     }
 
