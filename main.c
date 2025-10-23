@@ -19,8 +19,7 @@
 
 void ini_buttons(const uint *buttons);
 void ini_leds(const uint *leds, uint brightness);
-bool lights_on(const uint *leds, uint brightness);
-bool lights_off(const uint *leds);
+bool light_switch(const uint *leds, uint brightness, bool on);
 void set_brightness(const uint *leds, uint brightness);
 uint clamp(int br);
 
@@ -41,32 +40,33 @@ int main() {
 
     while (true) {
 
-        bool sw1_state = gpio_get(SW1);
+        const bool sw1_state = gpio_get(SW1);
         if (previous_state && !sw1_state) {
             // Turn lights on
             if (!lightsOn) {
-                if (brightness <= 0)
-                    brightness = 500;
-                lightsOn = lights_on(leds, brightness);
+                if (brightness <= 0) brightness = 500;
+                lightsOn = light_switch(leds, brightness, true);
             }
             // Turn lights off
             else
-                lightsOn = lights_off(leds);
+                lightsOn = light_switch(leds, 0, false);
         }
 
         if (lightsOn) {
             // Increase lighting
-            //printf("Brightness before: %d\r\n", brightness);
             if (!gpio_get(SW2)) {
+                printf("Brightness before: %d\r\n", brightness);
                 brightness = clamp((int)brightness - 40);
                 set_brightness(leds, brightness);
+                printf("Brightness after: %d\r\n", brightness);
             }
             // Decrease lighting
             if (!gpio_get(SW0)) {
+                printf("Brightness before: %d\r\n", brightness);
                 brightness = clamp((int)brightness + 40);
                 set_brightness(leds, brightness);
+                printf("Brightness after: %d\r\n", brightness);
             }
-            //printf("Brightness after: %d\r\n", brightness);
         }
 
         sleep_ms(250);
@@ -84,9 +84,10 @@ void ini_buttons(const uint *buttons) {
 
 void ini_leds(const uint *leds, const uint brightness) {
     for (int i = 0; i < 3; i++) {
+        gpio_set_function(leds[i], GPIO_FUNC_PWM);
         const uint slice_num = pwm_gpio_to_slice_num(leds[i]); // Get slice
         const uint chan = pwm_gpio_to_channel(leds[i]); // Channel GPIO pin
-        pwm_set_enabled(leds[i], false); // Stop PWM
+        //pwm_set_enabled(slice_num, false); // Stop PWM
 
         pwm_config config = pwm_get_default_config(); // Get default PWM configuration
         pwm_config_set_clkdiv_int(&config, FREQ); // Set clock divider
@@ -94,28 +95,24 @@ void ini_leds(const uint *leds, const uint brightness) {
 
         pwm_init(slice_num, &config, false); // start set to false
         pwm_set_chan_level(slice_num, chan, brightness); // duty cycle
-        gpio_set_function(leds[i], GPIO_FUNC_PWM);
+        //gpio_set_function(leds[i], GPIO_FUNC_PWM);
         pwm_set_enabled(leds[i], true); // Start PWM
     }
 }
 
-bool lights_on(const uint *leds, const uint brightness) {
-    printf("Lights on\r\n");
+bool light_switch(const uint *leds, const uint brightness, const bool on) {
+
     for (int i = 0; i < LEDS_SIZE; i++) {
         const uint slice_num = pwm_gpio_to_slice_num(leds[i]);
         const uint chan = pwm_gpio_to_channel(leds[i]);
         pwm_set_chan_level(slice_num, chan, brightness);
-        pwm_set_enabled(slice_num, true);
+        if (on) pwm_set_enabled(slice_num, on);
     }
-    return true;
-}
-
-bool lights_off(const uint *leds) {
+    if (on) {
+        printf("Lights on\r\n");
+        return true;
+    }
     printf("Lights off\r\n");
-    for (int i = 0; i < LEDS_SIZE; i++) {
-        const uint slice_num = pwm_gpio_to_slice_num(leds[i]);
-        pwm_set_enabled(slice_num, false);
-    }
     return false;
 }
 
@@ -128,15 +125,11 @@ void set_brightness(const uint *leds, const uint brightness) {
 }
 
 uint clamp(const int br) {
-    if (br < 0) {
-        //printf("return 0\r\n");
+    if (br < 0)
         return 0;
-    }
 
-    if (br > TOP_FREQ) {
-        //printf("Return top frequency\r\n");
+    if (br > TOP_FREQ)
         return TOP_FREQ;
-    }
 
     return br;
 }
