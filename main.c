@@ -112,12 +112,11 @@ void ini_leds(const uint *leds) {
             pwm_init(slice, &config, true);
             slice_ini[slice] = true;
         }
+
         // Set level to (CC) -> duty cycle
         pwm_set_chan_level(slice, chan, 0);
-
         // Select PWM model for your pin
         gpio_set_function(leds[i], GPIO_FUNC_PWM);
-
         // Start PWM
         pwm_set_enabled(leds[i], true);
     }
@@ -130,7 +129,6 @@ bool light_switch(const uint *leds, const uint brightness, const bool on) {
         const uint chan = pwm_gpio_to_channel(leds[i]);
         pwm_set_chan_level(slice, chan, on ? brightness : 0);
     }
-
     return on;
 }
 
