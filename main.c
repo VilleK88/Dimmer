@@ -16,7 +16,7 @@
 #define D3 20 // left LED
 #define LEDS_SIZE 3 // how many LEDs
 
-#define BR_RATE 50 // how fast brightness rate changes
+#define BR_RATE 50 // step size for brightness changes
 #define BR_MID 500 // 50% brightness level
 
 void ini_buttons(const uint *buttons);
@@ -37,14 +37,13 @@ int main() {
     // Initialize LED pins
     ini_leds(leds);
 
-    // Initialize boolean lights on/off value
     bool lightsOn = false;
-    // Initialize release SW1 button boolean
-    bool previous_state = true;
+    bool previous_state = true; // SW1 is pulled up, so "released" = true
 
     while (true) {
-
         const bool sw1_state = gpio_get(SW1);
+
+        // released -> pressed
         if (previous_state && !sw1_state) {
             // Turn lights on
             if (!lightsOn) {
@@ -100,12 +99,17 @@ void ini_leds(const uint *leds) {
     pwm_config_set_wrap(&config, TOP);
 
     for (int i = 0; i < LEDS_SIZE; i++) {
+        // Select PWM model for your pin
         gpio_set_function(leds[i], GPIO_FUNC_PWM);
+        // Get slice and channel your GPIO pin
         const uint slice = pwm_gpio_to_slice_num(leds[i]);
         const uint chan = pwm_gpio_to_channel(leds[i]);
 
+        // Check if slice num is already in use
         if (!slice_ini[slice]) {
+            // Start set to true
             pwm_init(slice, &config, true);
+            // Set level to (CC) -> duty cycle
             slice_ini[slice] = true;
         }
         pwm_set_chan_level(slice, chan, 0);
@@ -113,6 +117,7 @@ void ini_leds(const uint *leds) {
 }
 
 bool light_switch(const uint *leds, const uint brightness, const bool on) {
+    // Set duty for all channels
     for (int i = 0; i < LEDS_SIZE; i++) {
         const uint slice = pwm_gpio_to_slice_num(leds[i]);
         const uint chan = pwm_gpio_to_channel(leds[i]);
