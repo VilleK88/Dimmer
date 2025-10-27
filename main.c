@@ -117,7 +117,7 @@ void ini_leds(const uint *leds) {
 }
 
 bool light_switch(const uint *leds, const uint brightness, const bool on) {
-    // Set duty for all channels
+    // Set duty for all LED channels
     for (int i = 0; i < LEDS_SIZE; i++) {
         const uint slice = pwm_gpio_to_slice_num(leds[i]);
         const uint chan = pwm_gpio_to_channel(leds[i]);
@@ -128,6 +128,7 @@ bool light_switch(const uint *leds, const uint brightness, const bool on) {
 }
 
 void set_brightness(const uint *leds, const uint brightness) {
+    // Update duty for all LED channels
     for (int i = 0; i < LEDS_SIZE; i++) {
         const uint slice = pwm_gpio_to_slice_num(leds[i]);
         const uint chan  = pwm_gpio_to_channel(leds[i]);
