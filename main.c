@@ -123,7 +123,7 @@ bool light_switch(const uint *leds, const uint brightness, const bool on) {
         const uint chan = pwm_gpio_to_channel(leds[i]);
         pwm_set_chan_level(slice, chan, on ? brightness : 0);
     }
-
+    
     return on;
 }
 
@@ -134,7 +134,6 @@ void set_brightness(const uint *leds, const uint brightness) {
         const uint chan  = pwm_gpio_to_channel(leds[i]);
         pwm_set_chan_level(slice, chan, brightness);
     }
-
 }
 
 uint clamp(const int br) {
