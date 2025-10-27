@@ -99,11 +99,12 @@ void ini_leds(const uint *leds) {
     pwm_config_set_wrap(&config, TOP);
 
     for (int i = 0; i < LEDS_SIZE; i++) {
-        // Select PWM model for your pin
-        gpio_set_function(leds[i], GPIO_FUNC_PWM);
         // Get slice and channel your GPIO pin
         const uint slice = pwm_gpio_to_slice_num(leds[i]);
         const uint chan = pwm_gpio_to_channel(leds[i]);
+
+        // Stop PWM
+        pwm_set_enabled(leds[i], false);
 
         // Initialize each slice once
         if (!slice_ini[slice]) {
@@ -113,6 +114,12 @@ void ini_leds(const uint *leds) {
         }
         // Set level to (CC) -> duty cycle
         pwm_set_chan_level(slice, chan, 0);
+
+        // Select PWM model for your pin
+        gpio_set_function(leds[i], GPIO_FUNC_PWM);
+
+        // Start PWM
+        pwm_set_enabled(leds[i], true);
     }
 }
 
