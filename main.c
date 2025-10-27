@@ -17,7 +17,7 @@
 #define LEDS_SIZE 3 // how many LEDs
 
 #define BR_RATE 50 // step size for brightness changes
-#define BR_MID 500 // 50% brightness level
+#define BR_MID (TOP / 2) // 50% brightness level
 
 void ini_buttons(const uint *buttons);
 void ini_leds(const uint *leds);
@@ -123,7 +123,7 @@ bool light_switch(const uint *leds, const uint brightness, const bool on) {
         const uint chan = pwm_gpio_to_channel(leds[i]);
         pwm_set_chan_level(slice, chan, on ? brightness : 0);
     }
-    
+
     return on;
 }
 
