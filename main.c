@@ -105,13 +105,13 @@ void ini_leds(const uint *leds) {
         const uint slice = pwm_gpio_to_slice_num(leds[i]);
         const uint chan = pwm_gpio_to_channel(leds[i]);
 
-        // Check if slice num is already in use
+        // Initialize each slice once
         if (!slice_ini[slice]) {
             // Start set to true
             pwm_init(slice, &config, true);
-            // Set level to (CC) -> duty cycle
             slice_ini[slice] = true;
         }
+        // Set level to (CC) -> duty cycle
         pwm_set_chan_level(slice, chan, 0);
     }
 }
