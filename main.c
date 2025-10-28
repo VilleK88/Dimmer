@@ -75,7 +75,7 @@ int main() {
             }
         }
 
-        sleep_ms(200);
+        sleep_ms(100);
         previous_state = sw1_state;
     }
 }
@@ -120,13 +120,12 @@ void ini_leds(const uint *leds) {
 }
 
 bool light_switch(const uint *leds, const uint brightness, const bool on) {
-    // Set duty for all LED channels
-    for (int i = 0; i < LEDS_SIZE; i++) {
-        const uint slice = pwm_gpio_to_slice_num(leds[i]);
-        const uint chan = pwm_gpio_to_channel(leds[i]);
-        pwm_set_chan_level(slice, chan, on ? brightness : 0);
+    if (on) {
+        set_brightness(leds, brightness);
+        return true;
     }
-    return on;
+    set_brightness(leds, 0);
+    return false;
 }
 
 void set_brightness(const uint *leds, const uint brightness) {
