@@ -118,7 +118,7 @@ void ini_leds(const uint *leds) {
         // Select PWM model for your pin
         gpio_set_function(leds[i], GPIO_FUNC_PWM);
         // Start PWM
-        pwm_set_enabled(leds[i], true);
+        pwm_set_enabled(slice, true);
     }
 }
 
