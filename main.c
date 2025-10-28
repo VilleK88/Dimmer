@@ -3,8 +3,8 @@
 #include "hardware/pwm.h"
 #include <stdbool.h>
 
-#define CLK_DIV 125
-#define TOP 999
+#define CLK_DIV 125 // PWM clock divider
+#define TOP 999 // PWM counter top value
 
 #define SW2 7 // right button - decreases brightness
 #define SW1 8 // middle button - light switch
@@ -103,13 +103,11 @@ void ini_leds(const uint *leds) {
         const uint slice = pwm_gpio_to_slice_num(leds[i]);
         const uint chan = pwm_gpio_to_channel(leds[i]);
 
-        // Stop PWM
-        pwm_set_enabled(leds[i], false);
+        pwm_set_enabled(leds[i], false); // Stop PWM
 
         // Initialize each slice once
         if (!slice_ini[slice]) {
-            // Start set to true
-            pwm_init(slice, &config, true);
+            pwm_init(slice, &config, false); // Start set to false
             slice_ini[slice] = true;
         }
 
@@ -117,8 +115,7 @@ void ini_leds(const uint *leds) {
         pwm_set_chan_level(slice, chan, 0);
         // Select PWM model for your pin
         gpio_set_function(leds[i], GPIO_FUNC_PWM);
-        // Start PWM
-        pwm_set_enabled(slice, true);
+        pwm_set_enabled(slice, true); // Start PWM
     }
 }
 
