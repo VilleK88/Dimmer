@@ -75,9 +75,13 @@ int main() {
                 set_brightness(leds, brightness);
             }
         }
-
-        sleep_ms(100); // 100 ms delay (0.1 second)
-        SW1_unpressed = sw1_state; // To prevent double press
+        // 100 ms polling delay:
+        //  - filters out unintended rapid toggles
+        //  - reduces CPU usage
+        sleep_ms(100);
+        // Store current SW1 state for next loop iteration
+        // used for edge detection and double-press prevention
+        SW1_unpressed = sw1_state;
     }
 }
 
