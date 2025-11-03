@@ -6,9 +6,9 @@
 #define CLK_DIV 125 // PWM clock divider
 #define TOP 999 // PWM counter top value
 
-#define SW2 7 // right button - decreases brightness
-#define SW1 8 // middle button - light switch
-#define SW0 9 // left button - increases brightness
+#define SW_R 7 // right button - decreases brightness
+#define SW_M 8 // middle button - light switch
+#define SW_L 9 // left button - increases brightness
 #define BUTTONS_SIZE 3 // how many buttons
 
 #define LED_R 22 // right LED
@@ -26,7 +26,7 @@ void set_brightness(const uint *leds, uint brightness); // Increase/decrease lig
 uint clamp(int br); // returns value between 0 and TOP
 
 int main() {
-    const uint buttons[] = {SW2, SW1, SW0};
+    const uint buttons[] = {SW_R, SW_M, SW_L};
     const uint leds[] = {LED_R, LED_M, LED_L};
     uint brightness = BR_MID; // LEDs brightness value
 
@@ -42,7 +42,7 @@ int main() {
 
     while (true) {
         // SW1 state: true = not pressed, false = pressed
-        const bool sw1_state = gpio_get(SW1);
+        const bool sw1_state = gpio_get(SW_M);
 
         // Detect button press (transition from released to pressed)
         if (SW1_unpressed && !sw1_state) {
@@ -65,12 +65,12 @@ int main() {
 
         if (lightsOn) {
             // Increase lighting
-            if (!gpio_get(SW2)) {
+            if (!gpio_get(SW_R)) {
                 brightness = clamp((int)brightness - BR_RATE);
                 set_brightness(leds, brightness);
             }
             // Decrease lighting
-            if (!gpio_get(SW0)) {
+            if (!gpio_get(SW_L)) {
                 brightness = clamp((int)brightness + BR_RATE);
                 set_brightness(leds, brightness);
             }
