@@ -18,6 +18,7 @@
 
 #define BR_RATE 50 // step size for brightness changes
 #define BR_MID (TOP / 2) // 50% brightness level
+#define MAX_BR (TOP + 1)
 
 void ini_buttons(const uint *buttons); // Initialize buttons
 void ini_leds(const uint *leds); // Initialize LED pins
@@ -148,6 +149,6 @@ void set_brightness(const uint *leds, const uint brightness) {
 uint clamp(const int br) {
     // Limit brightness value to valid PWM range [0, TOP]
     if (br < 0) return 0; // Lower bound
-    if (br > TOP) return TOP; // Upper bound
+    if (br > MAX_BR) return MAX_BR; // Upper bound
     return br; // Within range
 }
