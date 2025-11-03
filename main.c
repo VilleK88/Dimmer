@@ -19,11 +19,11 @@
 #define BR_RATE 50 // step size for brightness changes
 #define BR_MID (TOP / 2) // 50% brightness level
 
-void ini_buttons(const uint *buttons);
-void ini_leds(const uint *leds);
-bool light_switch(const uint *leds, uint brightness, bool on);
-void set_brightness(const uint *leds, uint brightness);
-uint clamp(int br);
+void ini_buttons(const uint *buttons); // Initialize buttons
+void ini_leds(const uint *leds); // Initialize LED pins
+bool light_switch(const uint *leds, uint brightness, bool on); // Turn lights on/off
+void set_brightness(const uint *leds, uint brightness); // Increase/decrease lighting
+uint clamp(int br); // returns value between 0 and TOP
 
 int main() {
     const uint buttons[] = {SW2, SW1, SW0};
@@ -38,24 +38,25 @@ int main() {
     ini_leds(leds);
 
     bool lightsOn = false;
-    bool previous_state = true; // SW1 is pulled up, so "released" = true
+    bool SW1_unpressed = true; // SW1 has pull-up, so unpressed = true
 
     while (true) {
+        // SW1 state: true = not pressed, false = pressed
         const bool sw1_state = gpio_get(SW1);
 
-        // released -> pressed
-        if (previous_state && !sw1_state) {
+        // Detect button press (transition from released to pressed)
+        if (SW1_unpressed && !sw1_state) {
             // Turn lights on
             if (!lightsOn) {
                 lightsOn = light_switch(leds, brightness, true);
             }
             else {
-                // If LEDs are on and dimmed to 0% then set 50% brightness
+                // If LEDs are on and brightness is 0%, restore to 50%
                 if (brightness <= 0) {
                     brightness = BR_MID;
                     set_brightness(leds, BR_MID);
                 }
-                // Turn lights off
+                // Otherwise turn lights off
                 else {
                     lightsOn = light_switch(leds, 0, false);
                 }
@@ -75,8 +76,8 @@ int main() {
             }
         }
 
-        sleep_ms(100);
-        previous_state = sw1_state;
+        sleep_ms(100); // 100 ms delay (0.1 second)
+        SW1_unpressed = sw1_state;
     }
 }
 
@@ -89,6 +90,7 @@ void ini_buttons(const uint *buttons) {
 }
 
 void ini_leds(const uint *leds) {
+    // Track which PWM slices (0-7) have been initialized
     bool slice_ini[8] = {false};
 
     // Get default PWM configuration
@@ -103,7 +105,8 @@ void ini_leds(const uint *leds) {
         const uint slice = pwm_gpio_to_slice_num(leds[i]);
         const uint chan = pwm_gpio_to_channel(leds[i]);
 
-        pwm_set_enabled(leds[i], false); // Stop PWM
+        // Stop PWM
+        pwm_set_enabled(leds[i], false);
 
         // Initialize each slice once
         if (!slice_ini[slice]) {
@@ -111,11 +114,12 @@ void ini_leds(const uint *leds) {
             slice_ini[slice] = true;
         }
 
-        // Set level to (CC) -> duty cycle
+        // Set compare value (CC) to define duty cycle
         pwm_set_chan_level(slice, chan, 0);
         // Select PWM model for your pin
         gpio_set_function(leds[i], GPIO_FUNC_PWM);
-        pwm_set_enabled(slice, true); // Start PWM
+        // Start PWM
+        pwm_set_enabled(slice, true);
     }
 }
 
