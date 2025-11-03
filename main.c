@@ -65,13 +65,13 @@ int main() {
 
         if (lightsOn) {
             // Increase lighting
-            if (!gpio_get(SW_R)) {
-                brightness = clamp((int)brightness - BR_RATE);
+            if (!gpio_get(SW_L)) {
+                brightness = clamp((int)brightness + BR_RATE);
                 set_brightness(leds, brightness);
             }
             // Decrease lighting
-            if (!gpio_get(SW_L)) {
-                brightness = clamp((int)brightness + BR_RATE);
+            if (!gpio_get(SW_R)) {
+                brightness = clamp((int)brightness - BR_RATE);
                 set_brightness(leds, brightness);
             }
         }
