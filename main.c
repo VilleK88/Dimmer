@@ -105,16 +105,16 @@ void ini_leds(const uint *leds) {
     pwm_config_set_wrap(&config, TOP);
 
     for (int i = 0; i < LEDS_SIZE; i++) {
-        // Get slice and channel your GPIO pin
+        // Get slice and channel for your GPIO pin
         const uint slice = pwm_gpio_to_slice_num(leds[i]);
         const uint chan = pwm_gpio_to_channel(leds[i]);
 
-        // Stop PWM
-        pwm_set_enabled(leds[i], false);
+        // Disable PWM while configuring
+        pwm_set_enabled(slice, false);
 
-        // Initialize each slice once
+        // Initialize each slice once (sets divider and TOP for both A/B)
         if (!slice_ini[slice]) {
-            pwm_init(slice, &config, false); // Start set to false
+            pwm_init(slice, &config, false); // Do not start yet
             slice_ini[slice] = true;
         }
 
