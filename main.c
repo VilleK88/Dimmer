@@ -77,15 +77,15 @@ int main() {
         }
 
         sleep_ms(100); // 100 ms delay (0.1 second)
-        SW1_unpressed = sw1_state;
+        SW1_unpressed = sw1_state; // To prevent double press
     }
 }
 
 void ini_buttons(const uint *buttons) {
     for (int i = 0; i < BUTTONS_SIZE; i++) {
-        gpio_init(buttons[i]);
-        gpio_set_dir(buttons[i], GPIO_IN);
-        gpio_pull_up(buttons[i]);
+        gpio_init(buttons[i]); // Initialize GPIO pin
+        gpio_set_dir(buttons[i], GPIO_IN); // Set as input
+        gpio_pull_up(buttons[i]); // Enable internal pull-up resistor (button reads high when not pressed)
     }
 }
 
@@ -133,16 +133,17 @@ bool light_switch(const uint *leds, const uint brightness, const bool on) {
 }
 
 void set_brightness(const uint *leds, const uint brightness) {
-    // Update duty for all LED channels
+    // Set PWM duty cycle for each LED to match the desired brightness
     for (int i = 0; i < LEDS_SIZE; i++) {
-        const uint slice = pwm_gpio_to_slice_num(leds[i]);
-        const uint chan  = pwm_gpio_to_channel(leds[i]);
-        pwm_set_chan_level(slice, chan, brightness);
+        const uint slice = pwm_gpio_to_slice_num(leds[i]);  // Get PWM slice for LED pin
+        const uint chan  = pwm_gpio_to_channel(leds[i]); // Get PWM channel (A/B)
+        pwm_set_chan_level(slice, chan, brightness); // Update duty cycle value
     }
 }
 
 uint clamp(const int br) {
-    if (br < 0) return 0;
-    if (br > TOP) return TOP;
-    return br;
+    // Limit brightness value to valid PWM range [0, TOP]
+    if (br < 0) return 0; // Lower bound
+    if (br > TOP) return TOP; // Upper bound
+    return br; // Within range
 }
