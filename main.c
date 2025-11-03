@@ -89,7 +89,7 @@ void ini_buttons(const uint *buttons) {
     for (int i = 0; i < BUTTONS_SIZE; i++) {
         gpio_init(buttons[i]); // Initialize GPIO pin
         gpio_set_dir(buttons[i], GPIO_IN); // Set as input
-        gpio_pull_up(buttons[i]); // Enable internal pull-up resistor (button reads high when not pressed)
+        gpio_pull_up(buttons[i]); // Enable internal pull-up resistor (button reads high = true when not pressed)
     }
 }
 
