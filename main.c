@@ -11,9 +11,9 @@
 #define SW0 9 // left button - increases brightness
 #define BUTTONS_SIZE 3 // how many buttons
 
-#define D1 22 // right LED
-#define D2 21 // middle LED
-#define D3 20 // left LED
+#define LED_R 22 // right LED
+#define LED_M 21 // middle LED
+#define LED_L 20 // left LED
 #define LEDS_SIZE 3 // how many LEDs
 
 #define BR_RATE 50 // step size for brightness changes
@@ -27,7 +27,7 @@ uint clamp(int br);
 
 int main() {
     const uint buttons[] = {SW2, SW1, SW0};
-    const uint leds[] = {D1, D2, D3};
+    const uint leds[] = {LED_R, LED_M, LED_L};
     uint brightness = BR_MID; // LEDs brightness value
 
     // Initialize chosen serial port
